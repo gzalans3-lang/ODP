@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operatīvās Darbības Likuma Tests</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --card-bg: #1a1a1e;
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-color: #e4e4e7;
+            --text-muted: #a1a1aa;
+            --success: #10b981;
+            --error: #ef4444;
+            --border: #27272a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .quiz-container { background-color: var(--card-bg); width: 100%; max-width: 650px; border-radius: 16px; border: 1px solid var(--border); padding: 32px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+        .title { font-size: 1.1rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0.05em; }
+        .progress { font-size: 0.9rem; background: var(--border); padding: 4px 12px; border-radius: 20px; color: var(--primary-color); font-weight: bold; }
+        
+        .question { font-size: 1.3rem; font-weight: 600; margin-bottom: 24px; line-height: 1.5; }
+        .options-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+        
+        .option { background-color: var(--bg-color); border: 2px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s ease; font-size: 1rem; line-height: 1.4; }
+        .option:hover { border-color: var(--primary-color); background-color: rgba(99, 102, 241, 0.05); }
+        .option.selected { border-color: var(--primary-color); background-color: rgba(99, 102, 241, 0.1); }
+        .option.correct { border-color: var(--success); background-color: rgba(16, 185, 129, 0.1); }
+        .option.wrong { border-color: var(--error); background-color: rgba(239, 68, 68, 0.1); }
+        
+        .prefix { background: var(--border); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: 600; font-size: 0.9rem; flex-shrink: 0; }
+        .option.selected .prefix { background: var(--primary-color); color: white; }
+        .option.correct .prefix { background: var(--success); color: white; }
+        .option.wrong .prefix { background: var(--error); color: white; }
+
+        .btn { width: 100%; background-color: var(--primary-color); color: white; border: none; padding: 16px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; display: none; text-align: center; }
+        .btn:hover { background-color: var(--primary-hover); }
+
+        .results-screen { text-align: center; padding: 20px 0; }
+        .score-circle { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; margin: 0 auto 24px; color: var(--primary-color); }
+        .results-title { font-size: 1.8rem; margin-bottom: 12px; }
+        .results-text { color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div id="quiz-box">
+        <div class="header">
+            <span class="title">ODL UN VPK KONTROLE</span>
+            <span class="progress" id="progress-text">1 / 19</span>
+        </div>
+        <div class="question" id="question-text">Jautājums tiks ielādēts...</div>
+        <div class="options-list" id="options-container"></div>
+        <button class="btn" id="action-btn" onclick="handleAction()">Apstiprināt atbildi</button>
+    </div>
+
+    <div id="results-box" class="results-screen" style="display: none;">
+        <div class="score-circle" id="score-display">0/0</div>
+        <h2 class="results-title">Tests ir pabeigts!</h2>
+        <p class="results-text" id="feedback-text">Paldies par dalību. Rezultāts ir fiksēts.</p>
+        <button class="btn" style="display: block;" onclick="restartQuiz()">Mēģināt vēlreiz</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        { q: "Saskaņā ar ODL 1. pantu, kāds ir operatīvās darbības mērķis attiecībā uz valsti?", a: ["Aizsargāt personu dzīvību, veselību un īpašumu", "Nodrošināt Satversmi, valsts iekārtu un valstisko neatkarību", "Aizsargāt valsts noslēpumus pret ārējiem un iekšējiem apdraudējumiem", "Nodrošināt valsts aizsardzības, ekonomisko un zinātnisko potenciālu", "Iegūt informāciju par konkrētām personām pieejai valsts noslēpumam"], correct: 1 },
+        { q: "Kurš no šiem uzdevumiem NAV minēts ODL 2. panta pirmajā daļā kā operatīvās darbības uzdevums?", a: ["Valsts noslēpuma aizsardzība", "Personu aizsargāšana pret noziedzīgiem apdraudējumiem", "Tiesu spriedumu izpildes kontrole", "Bez vēsts pazudušo personu meklēšana", "Noziedzīgi iegūtas mantas meklēšana"], correct: 2 },
+        { q: "Kas akceptē operatīvās darbības subjektu iekšējos normatīvos aktus par darbības organizāciju, metodēm un taktiku?", a: ["Augstākās tiesas priekšsēdētājs", "Ģenerālprokurors", "Ministru kabinets", "Saeimas Nacionālās drošības komisija", "Attiecīgā ministrija"], correct: 1 },
+        { q: "Kuri operatīvās darbības principi ir nostiprināti ODL 4. pantā?", a: ["Likumība", "Proporcionalitāte (pasākumiem jāatbilst apdraudējuma veidam un bīstamības pakāpei)", "Subsidiaritāte (pasākumi uzsākami tikai, ja mērķi nevar sasniegt citā veidā)", "Politiskā neitralitāte", "Slepenības prioritāte pār cilvēktiesībām"], correct: 0 },
+        { q: "Persona uzskata, ka operatīvās darbības subjekts ir pārkāpis tās tiesības. Kāda ir likumā paredzētā rīcība?", a: ["Iesniegt sūdzību Valsts policijai", "Iesniegt sūdzību prokuroram", "Vērsties tiesā", "Iesniegt iesniegumu Tieslietu ministrijai", "Iesniegt sūdzību Valsts kontrolei"], correct: 1 },
+        { q: "Kuri no uzskaitītajiem pasākumiem ir iekļauti ODL 6. pantā kā operatīvās darbības pasākumi?", a: ["Operatīvā iekļūšana", "Operatīvais eksperiments", "Kontrolētā piegāde", "Kratīšana", "Operatīvā publiski nepieejamas vietas videonovērošana"], correct: 1 },
+        { q: "Vai ODL 6. pantā dotais operatīvās darbības pasākumu uzskaitījums ir izsmeļošs (pilnīgs)?", a: ["Jā, to var grozīt vai papildināt tikai ar likumu", "Nē, Ministru kabinets var noteikt papildu pasākumus", "Nē, ģenerālprokurors ar rīkojumu var pievienot jaunus pasākumus", "Jā, bet izņēmuma gadījumos operatīvās darbības subjekts var pievienot jaunus", "Nē, to var grozīt ar iekšēju normatīvo aktus"], correct: 0 },
+        { q: "Kuri operatīvās darbības pasākumi obligāti veicami TIKAI sevišķajā veidā ar Augstākās tiesas priekšsēdētāja vai viņa pilnvarota tiesneša akceptu?", a: ["Operatīvā korespondences kontrole", "Operatīvā sarunu noklausīšanās", "Operatīvā izzināšana", "Operatīvā publiski nepieejamas vietas videonovērošana", "Operatīvā iekļūšana"], correct: 1 },
+        { q: "Uz cik ilgu laiku var izsniegt atļauju veikt sevišķajā veidā veicamos pasākumus, kas minēti ODL 7. panta 4. daļā, un vai pagarināšanas reižu skaits ir ierobežots?", a: ["Uz laiku līdz 6 mēnešiem; pagarināšanas reižu skaits nav ierobežots", "Uz laiku līdz 3 mēnešiem; pagarināšanas reižu skaits nav ierobežots", "Uz laiku līdz 3 mēnešiem; var pagarināt ne vairāk kā 3 reizes", "Uz laiku līdz 6 mēnešiem; var pagarināt ne vairāk kā 2 reizes", "Uz laiku līdz 1 mēnesim; pagarināšanas reižu skaits nav ierobežots"], correct: 1 },
+        { q: "Neatliekamā gadījumā (terorisms, slepkavība u.c.) sevišķajā veidā veicamos pasākumus var uzsākt ar prokurora piekrišanu. Kāds ir tiesneša akcepts saņemamas termiņš?", a: ["24 stundu laikā", "Nākamajā darbdienā, bet ne vēlāk kā 72 stundu laikā", "3 darbdienu laikā", "7 dienu laikā", "Nekavējoties — vienlaikus ar prokurora piekrišanu"], correct: 0 },
+        { q: "Vai operatīvās darbības pasākumu organizācija, metodika un taktika ir valsts noslēpums?", a: ["Jā, tā ir valsts noslēpums", "Nē, tā ie iepriekš ierobežotas pieejamības informācija", "Tikai daļēji — taktika ir valsts noslēpums, bet organizācija nav", "Tas ir atkarīgs no konkrētā operatīvās darbības subjekta", "Nē, bet tā nav publiski pieejama informācija"], correct: 0 },
+        { q: "Operatīvās ziņu iegūšana no kredītiestādēm vai finanšu iestādēm (ODL 9. pants) — kāds akcepts ir nepieciešams?", a: ["Operatīvās darbības subjekta vadītāja akcepts", "Prokurora akcepts", "Rajona (pilsētas) tiesas tiesneša akcepts", "Augstākās tiesas priekšsēdētāja vai viņa pilnvarota Augstākās tiesas tiesneša akcepts", "Nav nepieciešams akcepts — pietiek ar rakstveida pieprasījumu"], correct: 2 },
+        { q: "Cik dienas slepenā novērošana (izsekošana) ir pieļaujama bez papildu atļaujas? Pēc kāda perioda tā uzskatāma par 'ilgstošu'?", a: ["7 dienas", "14 dienas", "Vairāk nekā 30 dienas", "60 dienas", "90 dienas"], correct: 2 },
+        { q: "Operatīvās apskates (ODL 11. pants) ietvaros — kad drīkst apskatīt telpas un transportlīdzekļus, kas nav publiski pieejami?", a: ["Ar prokurora sankciju", "Ar tiesneša akceptu", "Ar attiecīgo valdītāju piekrišanu", "Ar operatīvās darbības subjekta vadītāja atļauju", "Tas nav atļauts nekādā gadījumā"], correct: 2 },
+        { q: "Kāda ir paraugu operatīvās izpētes rezultātu procesuālā nozīme kriminālprocesā?", a: ["Tos drīkst izmantot kā pilnvērtīgus pierādījumus", "Tos drīkst izmantot tikai netieši — kā norādi uz citiem pierādījumiem", "Tos nedrīkst izmantot kā procesuālus pierādījumus", "Tos drīkst izmantot ar prokurora atļauju", "Tos drīkst izmantot tikai tiesā ar tiesneša lēmumu"], correct: 1 },
+        { q: "Operatīvais eksperiments ar mērķi fiksēt personu rīcību noziedzīgu rīcību izraisošā situācijā — kādi nosacījumi jāievēro?", a: ["Pamatots lēmums, ko akceptējis prokuror", "Jābūt pamatotai informācijai, ka persona gatavo vai izdara noziedzīgu nodarījumu vai ir iesaistīta darbībās, kas rada draudus", "Nepieciešams tiesneša akcepts", "Lēmumu pieņem tikai operatīvās darbības subjekta vadītājs", "Pietiek ar tiešā vadītāja mutisku atļauju"], correct: 1 },
+        { q: "Kontrolētā piegāde — kādos gadījumos tā ir aizliegta?", a: ["Ja nav iespējams pilnīgi novērst apdraudējumu cilvēku dzīvībai vai veselībai", "Ja preces tiek pārvietotas pāri valstu robežām", "Ja nav iespējams pilnīgi novērst cilvēku dzīvībai bīstamu vielu izplatīšanos", "Ja nav iespējams novērst ekoloģisku katastrofu vai neatgriezenisku mantisku zaudējumu", "Ja kontrolētā piegāde tiek veikta bez prokurora lēmuma"], correct: 0 },
+        { q: "Operatīvās izstrādes (ODL 22. pants) sākotnējais termiņš ir seši mēneši. Kas var akceptēt vēlreizēju (otro) termiņa pagarinājumu?", a: ["Operatīvās darbības subjekta vadītājs vai viņa vietnieks", "Ģenerālprokurors vai viņa speciāli pilnvarots prokurors", "Augstākās tiesas priekšsēdētājs", "Rajona tiesas tiesnesis", "Jebkurš prokurors"], correct: 1 },
+        { q: "Saskaņā ar ODL 24. pantu — kādā gadījumā ir pieļaujama advokātu, ārstu, psihologu vai garīdznieku profesionālās palīdzības sniegšanas laikā iegūtās informācijas saglabāšana?", a: ["Nekad — šādu informāciju vienmēr iznīcina", "Ar tiesneša akceptu", "Ar ģenerālprokurora vai viņa īpaši pilnvarota prokurora akceptu, ja informācija norāda uz minēto personu izdarītu/gatavotu noziedzīgu nodarījumu vai draudiem valsts/sabiedrības drošībai", "Ar operatīvās darbības subjekta vadītāja akceptu", "Tikai tad, ja personas tiek turētas aizdomās par terorismu"], correct: 2 }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let selectedOptionIndex = null;
+    let isAnswered = false;
+
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const progressText = document.getElementById("progress-text");
+    const actionBtn = document.getElementById("action-btn");
+    const quizBox = document.getElementById("quiz-box");
+    const resultsBox = document.getElementById("results-box");
+    const scoreDisplay = document.getElementById("score-display");
+
+    function loadQuestion() {
+        isAnswered = false;
+        selectedOptionIndex = null;
+        actionBtn.style.display = "none";
+        actionBtn.innerText = "Apstiprināt atbildi";
+        
+        const currentQuestion = quizData[currentQuestionIndex];
+        questionText.innerText = currentQuestion.q;
+        progressText.innerText = `${currentQuestionIndex + 1} / ${quizData.length}`;
+        
+        optionsContainer.innerHTML = "";
+        currentQuestion.a.forEach((option, index) => {
+            const letter = String.fromCharCode(65 + index);
+            const optionEl = document.createElement("div");
+            optionEl.classList.add("option");
+            optionEl.innerHTML = `<span class="prefix">${letter}</span><span>${option}</span>`;
+            optionEl.onclick = () => selectOption(index);
+            optionsContainer.appendChild(optionEl);
+        });
+    }
+
+    function selectOption(index) {
+        if (isAnswered) return;
+        selectedOptionIndex = index;
+        
+        const options = optionsContainer.querySelectorAll(".option");
+        options.forEach((opt, idx) => {
+            if (idx === index) opt.classList.add("selected");
+            else opt.classList.remove("selected");
+        });
+        
+        actionBtn.style.display = "block";
+    }
+
+    function handleAction() {
+        if (!isAnswered) {
+            isAnswered = true;
+            const currentQuestion = quizData[currentQuestionIndex];
+            const options = optionsContainer.querySelectorAll(".option");
+            
+            options.forEach((opt, idx) => {
+                opt.onclick = null;
+                if (idx === currentQuestion.correct) {
+                    opt.classList.remove("selected");
+                    opt.classList.add("correct");
+                } else if (idx === selectedOptionIndex) {
+                    opt.classList.remove("selected");
+                    opt.classList.add("wrong");
+                }
+            });
+
+            if (selectedOptionIndex === currentQuestion.correct) {
+                score++;
+            }
+
+            actionBtn.innerText = currentQuestionIndex === quizData.length - 1 ? "Skatīt rezultātus" : "Nākamais jautājums";
+        } else {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+    }
+
+    function showResults() {
+        quizBox.style.display = "none";
+        resultsBox.style.display = "block";
+        scoreDisplay.innerText = `${score} / ${quizData.length}`;
+        
+        const percentage = (score / quizData.length) * 100;
+        const feedback = document.getElementById("feedback-text");
+        if (percentage >= 80) {
+            feedback.innerText = "Izcili! Čujs, ņuhs un poņa strādā augstākajā līmenī. Teicamas operatīvās darbības zināšanas.";
+        } else if (percentage >= 50) {
+            feedback.innerText = "Labi! Pamati ir skaidri, taču dažas nianses par akceptiem un termiņiem ir vērts atkārtot.";
+        } else {
+            feedback.innerText = "Ir kur augt. Likuma nianses prasa precizitāti – ieskaties ODL pantos vēlreiz!";
+        }
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        resultsBox.style.display = "none";
+        quizBox.style.display = "block";
+        loadQuestion();
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
