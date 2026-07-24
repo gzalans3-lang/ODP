@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<title>Lieta Nr. 2026/OD-114</title>
+<style>
+  :root{
+    --paper:#eee7d8;
+    --paper-dark:#e2d9c4;
+    --ink:#2b2620;
+    --ink-soft:#5a5245;
+    --folder:#3d3a2f;
+    --folder-dark:#2a2820;
+    --stamp-red:#8c2f2f;
+    --stamp-green:#3a5a3a;
+    --line:#c9bea3;
+    --accent:#8c2f2f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--folder-dark);
+    font-family:'Courier New',monospace;
+    color:var(--ink);
+  }
+  .wrap{
+    max-width:900px;
+    margin:0 auto;
+    padding:28px 18px 60px;
+  }
+  .folder-tab{
+    background:var(--folder);
+    color:var(--paper);
+    display:inline-block;
+    padding:8px 22px;
+    font-size:12px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    border-radius:6px 6px 0 0;
+    font-family:Georgia, 'Times New Roman', serif;
+  }
+  .case{
+    background:
+      linear-gradient(var(--paper), var(--paper));
+    background-color:var(--paper);
+    border:1px solid var(--line);
+    box-shadow:0 18px 40px rgba(0,0,0,.45);
+    position:relative;
+    padding:0;
+  }
+  .case-header{
+    padding:26px 32px 18px;
+    border-bottom:2px solid var(--ink);
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .case-title{
+    font-family:Georgia, 'Times New Roman', serif;
+    font-size:26px;
+    letter-spacing:.5px;
+    margin:0;
+  }
+  .case-sub{
+    font-size:12px;
+    color:var(--ink-soft);
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+  .case-meta{
+    font-size:11px;
+    color:var(--ink-soft);
+    text-align:right;
+    line-height:1.6;
+  }
+  .progress-row{
+    display:flex;
+    gap:4px;
+    padding:14px 32px;
+    border-bottom:1px solid var(--line);
+    background:var(--paper-dark);
+  }
+  .prog-step{
+    flex:1;
+    text-align:center;
+    font-size:10px;
+    letter-spacing:.5px;
+    padding:8px 2px;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    position:relative;
+    background:var(--paper);
+  }
+  .prog-step.done{
+    background:var(--stamp-green);
+    color:var(--paper);
+    border-color:var(--stamp-green);
+  }
+  .prog-step.active{
+    background:var(--ink);
+    color:var(--paper);
+    border-color:var(--ink);
+  }
+  .body-pad{padding:28px 32px 34px;}
+  .brief{
+    background:var(--paper-dark);
+    border-left:4px solid var(--ink);
+    padding:16px 18px;
+    font-size:14px;
+    line-height:1.65;
+    margin-bottom:22px;
+  }
+  .brief b{font-family:Georgia,serif;}
+  .stage-label{
+    font-family:Georgia, serif;
+    font-size:19px;
+    margin:0 0 14px;
+    padding-bottom:8px;
+    border-bottom:1px dashed var(--line);
+  }
+  .stage-label span{
+    font-size:12px;
+    color:var(--ink-soft);
+    display:block;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:4px;
+    font-family:'Courier New',monospace;
+  }
+  .q{
+    font-size:15px;
+    margin-bottom:16px;
+    line-height:1.5;
+  }
+  .opt{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:var(--paper);
+    border:1px solid var(--ink-soft);
+    padding:12px 14px;
+    margin-bottom:9px;
+    font-family:'Courier New',monospace;
+    font-size:13.5px;
+    cursor:pointer;
+    color:var(--ink);
+    transition:background .15s, transform .1s;
+    line-height:1.4;
+  }
+  .opt:hover{background:var(--paper-dark);}
+  .opt:active{transform:scale(0.995);}
+  .opt.correct{
+    background:#dfe8df;
+    border-color:var(--stamp-green);
+    border-width:2px;
+    font-weight:bold;
+  }
+  .opt.wrong{
+    background:#ecdcdc;
+    border-color:var(--stamp-red);
+    border-width:2px;
+  }
+  .opt:disabled{cursor:default;opacity:.9;}
+  .feedback{
+    margin-top:16px;
+    padding:16px 18px;
+    border:2px solid var(--stamp-green);
+    background:#e4ede4;
+    font-size:13.5px;
+    line-height:1.6;
+    position:relative;
+    display:none;
+  }
+  .feedback.show{display:block;}
+  .feedback.bad{border-color:var(--stamp-red); background:#f0e3e3;}
+  .stamp{
+    display:inline-block;
+    font-family:Georgia, serif;
+    font-weight:bold;
+    letter-spacing:2px;
+    border:3px solid var(--stamp-green);
+    color:var(--stamp-green);
+    padding:4px 10px;
+    transform:rotate(-4deg);
+    font-size:13px;
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .stamp.bad{border-color:var(--stamp-red);color:var(--stamp-red);}
+  .law-ref{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:8px;
+    border-top:1px dotted var(--line);
+    padding-top:8px;
+  }
+  .next-btn{
+    margin-top:20px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    padding:12px 26px;
+    font-family:Georgia,serif;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    font-size:13px;
+    cursor:pointer;
+    display:none;
+  }
+  .next-btn.show{display:inline-block;}
+  .next-btn:hover{background:#000;}
+  .final{
+    display:none;
+    text-align:center;
+    padding:20px 10px 6px;
+  }
+  .final.show{display:block;}
+  .final .stamp{font-size:22px;padding:10px 22px;transform:rotate(-3deg);}
+  .final p{font-size:13px;color:var(--ink-soft);line-height:1.6;max-width:520px;margin:14px auto 0;}
+  .restart{
+    margin-top:18px;
+    background:transparent;
+    border:1px solid var(--ink);
+    color:var(--ink);
+    padding:9px 20px;
+    font-family:'Courier New',monospace;
+    font-size:12px;
+    cursor:pointer;
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  .score{
+    font-size:11px;
+    color:var(--ink-soft);
+    letter-spacing:1px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="folder-tab">Operatīvās izstrādes lieta</div>
+  <div class="case">
+    <div class="case-header">
+      <div>
+        <p class="case-title">Lieta Nr. 2026/OD-114</p>
+        <div class="case-sub">Narkotisko vielu realizācija — pilsēta virs 40 000 iedz.</div>
+      </div>
+      <div class="case-meta">
+        Statuss: <span id="statusText">Izstrādē</span><br>
+        Posms: <span id="stageNum">1</span> / 6<br>
+        Punkti: <span id="scoreText" class="score">0 / 6</span>
+      </div>
+    </div>
+
+    <div class="progress-row" id="progRow"></div>
+
+    <div class="body-pad">
+      <div class="brief">
+        <b>Situācija:</b> Iedzīvotāju skaits pilsētā pārsniedz 40 000. Saņemta informācija, ka konkrēta persona nodarbojas ar narkotisko vielu realizāciju "no rokas rokā", veido slēpņus un nauda rokās netiek ņemta. Saziņa notiek pa tālruni šifrētā veidā (kartupeļi — narkotikas, maisi — daudzums, 1 maiss = 1 deva). <b>Mērķis:</b> noskaidrot slēptuvi un identificēt augstāko ķēdes posmu — piegādātāju.
+      </div>
+
+      <div id="stageArea"></div>
+
+      <div class="final" id="finalArea">
+        <div class="stamp" id="finalStamp">LIETA PABEIGTA</div>
+        <p id="finalText"></p>
+        <button class="restart" id="restartBtn">▸ Sākt lietu no jauna</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const stages = [
+  {
+    label: "Izstrādes uzsākšana",
+    q: "Kāds ir pareizais pirmais juridiskais solis pēc informācijas saņemšanas par konkrētu personu?",
+    opts: [
+      "Uzsākt kriminālprocesu un veikt tūlītēju kratīšanu dzīvesvietā",
+      "Saskaņā ar ODL 22. pantu ierosināt un uzsākt operatīvās izstrādes lietu",
+      "Veikt publisku novērošanu bez jebkādiem dokumentiem"
+    ],
+    correct: 1,
+    good: "Tā kā persona ir konkrēta un identificējama, tiek uzsākta operatīvā izstrāde un persona tiek iekļauta operatīvajā uzskaitē.",
+    bad: "Bez operatīvās izstrādes lietas uzsākšanas (ODL 22. p.) tālākie pasākumi būtu procesuāli nesakārtoti un iegūtie dati vēlāk var kļūt neizmantojami kā pierādījumi.",
+    law: "ODL 22. pants — operatīvās izstrādes lietas uzsākšana"
+  },
+  {
+    label: "Sakaru kontrole",
+    q: "Kāds ODL pasākums jāveic šifrētās sarunplūsmas kontrolei, un kāds akcepts tam nepieciešams?",
+    opts: [
+      "Operatīvā sarunu noklausīšanās — bez jebkāda akcepta, jo persona jau ir uzskaitē",
+      "Operatīvā sarunu noklausīšanās — ar Augstākās tiesas priekšsēdētāja vai īpaši pilnvarota tiesneša akceptu (sevišķajā veidā)",
+      "Pietiek ar struktūrvienības vadītāja mutisku atļauju"
+    ],
+    correct: 1,
+    good: "Pareizi — sarunu noklausīšanās skar korespondences noslēpumu, tāpēc nepieciešams sevišķais akcepts. Neatliekamības gadījumā pasākumu var uzsākt uzreiz, informējot prokuroru 24 h laikā un saņemot tiesneša akceptu ne vēlāk kā 72 h laikā.",
+    bad: "Bez sevišķā akcepta (Augstākās tiesas priekšsēdētāja vai pilnvarota tiesneša) iegūtā informācija par sarunām nav izmantojama kā pierādījums, un pati darbība būtu prettiesiska iejaukšanās korespondences noslēpumā.",
+    law: "ODL 8. panta 1. daļas 11. p. un 17. panta 3. p. — sevišķais akcepts, 72 h kārtība"
+  },
+  {
+    label: "Slēptuves izsekošana",
+    q: "Kā izstrādes gaitā drīkst rīkoties ar dzīvokli, kurā, iespējams, atrodas slēptuve, ja valdītājs nedod piekrišanu?",
+    opts: [
+      "Iekļūt un veikt operatīvo apskati jebkurā brīdī, jo mērķis attaisno līdzekļus",
+      "Aprobežoties ar publiski pieejamu vietu apskati un novērošanu no ārpuses, kamēr nav iegūts likumā noteiktais īpašais pamats iekļūšanai",
+      "Lūgt kaimiņiem atslēgas kopiju"
+    ],
+    correct: 1,
+    good: "Publiski nepieejamas telpas apskate bez valdītāja piekrišanas pieļaujama tikai ar īpašu, likumā paredzētu pamatu un kārtību — pretējā gadījumā tā ir prettiesiska.",
+    bad: "Iekļūšana privātā telpā bez piekrišanas vai atbilstoša tiesiska pamata pārkāpj mājokļa neaizskaramību un padara iegūtos pierādījumus par nepieļaujamiem.",
+    law: "ODL 11. pants — operatīvā apskate; mājokļa neaizskaramības princips"
+  },
+  {
+    label: "Kontrolēts pirkums",
+    q: "Izstrāde plāno organizēt kontrolpirkumu, lai fiksētu realizācijas faktu un izsekotu vielu līdz piegādātājam. Kas jāievēro obligāti?",
+    opts: [
+      "Jebkādi paņēmieni ir pieļaujami, ja rezultātā tiek atklāts noziegums",
+      "Jāievēro provokācijas aizlieguma princips — persona nedrīkst tikt pamudināta izdarīt noziegumu, ko tā citādi nebūtu izdarījusi",
+      "Provokācijas aizliegums attiecas tikai uz smagiem noziegumiem, ne uz narkotiku realizāciju"
+    ],
+    correct: 1,
+    good: "Pareizi. Provokācijas aizliegums ir viens no būtiskākajiem ierobežojumiem operatīvajam eksperimentam/kontrolpirkumam — tas atkārtoti uzsvērts arī ECT judikatūrā.",
+    bad: "Ja pasākums faktiski rada noziegumu, nevis fiksē jau esošu noziedzīgu nodomu, iegūtie pierādījumi var tikt atzīti par nepieļaujamiem un process — par netaisnīgu.",
+    law: "Provokācijas aizliegums (sk. ECT judikatūru, piem., Teixeira de Castro pret Portugāli)"
+  },
+  {
+    label: "Pāreja uz kriminālprocesu",
+    q: "Materiāli par izplatītāju, slēptuvi un piegādātāju ir savākti. Kas notiek tālāk?",
+    opts: [
+      "Operatīvie materiāli tiek nodoti izmeklēšanas iestādei/prokuratūrai kriminālprocesa virzīšanai, izvērtējot to pieļaujamību kā pierādījumus",
+      "Lieta tiek slēgta bez tālākas virzības, jo operatīvā izstrāde ir pašmērķis",
+      "Materiāli tiek nododi tieši tiesai bez izmeklēšanas iestādes starpniecības"
+    ],
+    correct: 0,
+    good: "Pareizi — operatīvās izstrādes materiāli tiek noformēti un nodoti izmeklēšanas iestādei, lai tos legalizētu kriminālprocesā un uzsāktu procesuālās darbības (kratīšana, aizturēšana).",
+    bad: "Operatīvā izstrāde pati par sevi nav process — tās rezultāti jālegalizē kriminālprocesā, izvērtējot, vai visi akcepti un termiņi ir ievēroti.",
+    law: "ODL 27. pants — materiālu nodošana; KPL normas par OD rezultātu izmantošanu pierādīšanā"
+  },
+  {
+    label: "Procesuālās darbības",
+    q: "Kriminālprocess uzsākts. Kāda ir pareizā secība tālākajām procesuālajām darbībām?",
+    opts: [
+      "Vispirms publiska preses konference, tad kratīšana",
+      "Kratīšana ar izmeklēšanas tiesneša akceptu (vai neatliekamības kārtībā ar sekojošu tiesas kontroli), aizturēšana, ekspertīzes, nopratināšanas, materiālu nodošana prokuroram lēmuma pieņemšanai",
+      "Aizturēšana pirms jebkāda tiesas akcepta visos gadījumos"
+    ],
+    correct: 1,
+    good: "Pareizi — kratīšana veicama ar izmeklēšanas tiesneša akceptu (izņemot neatliekamus gadījumus ar sekojošu kontroli), tai seko aizturēšana, ekspertīzes un nopratināšanas, un visbeidzot lieta nonāk pie prokurora lēmuma par tālāko virzību.",
+    bad: "Procesuālo darbību secības un akceptu neievērošana apdraud visas krimināllietas pierādījumu bāzi.",
+    law: "KPL normas par kratīšanu, aizturēšanu un lietas virzību"
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+const progRow = document.getElementById('progRow');
+const stageArea = document.getElementById('stageArea');
+const finalArea = document.getElementById('finalArea');
+const stageNum = document.getElementById('stageNum');
+const scoreText = document.getElementById('scoreText');
+const statusText = document.getElementById('statusText');
+const finalText = document.getElementById('finalText');
+const finalStamp = document.getElementById('finalStamp');
+
+function renderProgress(){
+  progRow.innerHTML = '';
+  stages.forEach((s,i)=>{
+    const d = document.createElement('div');
+    d.className = 'prog-step' + (i < current ? ' done' : i === current ? ' active' : '');
+    d.textContent = (i+1) + '. ' + s.label;
+    progRow.appendChild(d);
+  });
+}
+
+function renderStage(){
+  answered = false;
+  renderProgress();
+  stageNum.textContent = current + 1;
+  scoreText.textContent = score + ' / ' + stages.length;
+  const s = stages[current];
+
+  let html = '<div class="stage-label"><span>Posms ' + (current+1) + ' no ' + stages.length + '</span>' + s.label + '</div>';
+  html += '<div class="q">' + s.q + '</div>';
+  s.opts.forEach((o,i)=>{
+    html += '<button class="opt" data-i="'+i+'">' + o + '</button>';
+  });
+  html += '<div class="feedback" id="fb"></div>';
+  html += '<button class="next-btn" id="nextBtn">Nākamais posms ▸</button>';
+
+  stageArea.innerHTML = html;
+
+  document.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>handleAnswer(parseInt(btn.dataset.i)));
+  });
+}
+
+function handleAnswer(i){
+  if(answered) return;
+  answered = true;
+  const s = stages[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(b=>b.disabled = true);
+
+  const isCorrect = (i === s.correct);
+  if(isCorrect){
+    opts[i].classList.add('correct');
+    score++;
+  } else {
+    opts[i].classList.add('wrong');
+    opts[s.correct].classList.add('correct');
+  }
+
+  const fb = document.getElementById('fb');
+  fb.classList.add('show');
+  if(!isCorrect) fb.classList.add('bad');
+  fb.innerHTML =
+    '<div class="stamp'+(isCorrect?'':' bad')+'">'+(isCorrect?'Pareizi':'Nepareizi')+'</div><br>' +
+    (isCorrect ? s.good : s.bad) +
+    '<div class="law-ref">' + s.law + '</div>';
+
+  scoreText.textContent = score + ' / ' + stages.length;
+  document.getElementById('nextBtn').classList.add('show');
+  document.getElementById('nextBtn').addEventListener('click', nextStage);
+}
+
+function nextStage(){
+  current++;
+  if(current >= stages.length){
+    showFinal();
+  } else {
+    renderStage();
+  }
+}
+
+function showFinal(){
+  renderProgress();
+  stageArea.innerHTML = '';
+  finalArea.classList.add('show');
+  statusText.textContent = 'Pabeigta';
+  const pct = Math.round((score/stages.length)*100);
+  let verdict;
+  if(pct === 100) verdict = "Lieta virzīta bez procesuāliem trūkumiem — visi akcepti un termiņi ievēroti.";
+  else if(pct >= 66) verdict = "Lieta virzīta, taču atsevišķos posmos pieļautas neprecizitātes, kas praksē varētu apdraudēt pierādījumu pieļaujamību.";
+  else verdict = "Vairākos posmos pieļauti būtiski procesuāli trūkumi — praksē tie varētu novest pie pierādījumu izslēgšanas vai lietas izbeigšanas.";
+
+  finalStamp.textContent = pct === 100 ? 'LIETA PABEIGTA — BEZ IEBILDĒM' : 'LIETA PABEIGTA';
+  finalStamp.className = 'stamp' + (pct === 100 ? '' : (pct>=66 ? '' : ' bad'));
+  finalText.textContent = 'Rezultāts: ' + score + ' no ' + stages.length + ' (' + pct + '%). ' + verdict;
+}
+
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  current = 0; score = 0;
+  finalArea.classList.remove('show');
+  statusText.textContent = 'Izstrādē';
+  renderStage();
+});
+
+renderStage();
+</script>
+</body>
+</html>
